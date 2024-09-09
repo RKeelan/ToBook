@@ -1,11 +1,13 @@
 import click
 import os
+import validators
 
 from .input_format import InputFormat
 from .md import Md
+from .web import Web
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-SUPPORTED_INPUT_FILE_FORMATS=[".md"]
+SUPPORTED_INPUT_FILE_FORMATS=[".json",".md"]
 SUPPORTED_OUTPUT_FILE_FORMATS=[".epub"]
 
 def check_input(value: str) -> str:
@@ -27,7 +29,10 @@ def check_output(value: str) -> str:
 
 def make_input_converter(input_path: str) -> InputFormat:
     extension = os.path.splitext(input_path)[-1].lower()
-    if extension == ".md":
+    if extension == ".json":
+        # Assume the json document is a list of urls
+        return Web(input_path)
+    elif extension == ".md":
         return Md(input_path)
     else:
         raise click.BadParameter(f"Couldn't find an input converter for `{input_path}`.")

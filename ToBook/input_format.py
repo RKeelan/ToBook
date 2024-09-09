@@ -1,31 +1,45 @@
 from abc import ABC, abstractmethod
 from ebooklib import epub
 import hashlib
-from typing import List
+from pathlib import Path
+from typing import List, Tuple
+
+class Chapter:
+    def __init__(self, title: str, content: str, images: List[Tuple[str, bytes]] = None):
+        self.title = title
+        self.content = content
+        self.images = images or []
 
 class InputFormat(ABC):
     def __init__(self, input_path: str):
         self.input_path = input_path
 
-    def make_epub(self, title: str, chapter_content: List[str]) -> epub.EpubBook:
-        all_content = "\n".join(chapter_content)
-        identifier = InputFormat.generate_identifier(all_content)
+    def to_epub(self, output_file):
         book = epub.EpubBook()
-        book.set_identifier(title)
-        book.set_title(title)
         book.set_language('en')
 
-        chapters = []
-        for i, content in enumerate(chapter_content, start=1):
-            chapter_title = f"Chapter {i}"
-            chapter_file = f'{chapter_title}.xhtml'
-            chapter = epub.EpubHtml(title=chapter_title, file_name=chapter_file, lang='en')
-            chapter.content = content
-            book.add_item(chapter)
-            chapters.append(chapter)
+        title = self.get_title()
+        book.set_title(title)
+
+        chapters = self.get_chapters()
+        all_content = "\n".join([chapter.content for chapter in chapters])
+        identifier = self.generate_identifier(all_content)
+        book.set_identifier(identifier)
+
+        epub_chapters = []
+        for i, chapter in enumerate(chapters, start=1):
+            chapter_file = f'{chapter.title}.xhtml'
+            epub_chapter = epub.EpubHtml(title=chapter.title, file_name=chapter_file, lang='en')
+            epub_chapter.content = chapter.content
+            book.add_item(epub_chapter)
+            epub_chapters.append(epub_chapter)
+
+            for img_filename, img_content in chapter.images:
+                img_item = epub.EpubItem(file_name=f"images/{img_filename}", content=img_content, media_type="image/jpeg")
+                book.add_item(img_item)
 
         # Table Of Contents
-        book.toc = chapters
+        book.toc = epub_chapters
 
         # Add default NCX and Nav file
         book.add_item(epub.EpubNcx())
@@ -41,9 +55,10 @@ class InputFormat(ABC):
         book.add_item(nav_css)
 
         # Basic spine
-        book.spine = ["nav"] + chapters
+        book.spine = ["nav"] + epub_chapters
 
-        return (book, identifier)
+        epub.write_epub(output_file, book, {})
+        return identifier
 
     @staticmethod
     def generate_identifier(content: str) -> str:
@@ -52,6 +67,9 @@ class InputFormat(ABC):
         return 'urn:uuid:' + hasher.hexdigest()
 
     @abstractmethod
-    def to_epub(self, output_file):
+    def get_title(self) -> str:
         pass
-    
+
+    @abstractmethod
+    def get_chapters(self) -> List[Chapter]:
+        pass

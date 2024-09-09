@@ -13,7 +13,8 @@ dependencies = [
     "bs4",
     "click",
     "ebooklib",
-    "markdown"
+    "markdown",
+    "requests"
 ]
 
 [project.urls]
