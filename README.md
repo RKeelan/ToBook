@@ -1,7 +1,5 @@
 # ToBook
 
-[![PyPI](https://img.shields.io/pypi/v/ToBook.svg)](https://pypi.org/project/ToBook/)
-[![Changelog](https://img.shields.io/github/v/release/RKeelan/ToBook?include_prereleases&label=changelog)](https://github.com/RKeelan/ToBook/releases)
 [![Tests](https://github.com/RKeelan/ToBook/actions/workflows/test.yml/badge.svg)](https://github.com/RKeelan/ToBook/actions/workflows/test.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/RKeelan/ToBook/blob/master/LICENSE)
 
