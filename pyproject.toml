@@ -14,7 +14,8 @@ dependencies = [
     "click",
     "ebooklib",
     "markdown",
-    "requests"
+    "requests",
+    "validators"
 ]
 
 [project.urls]
